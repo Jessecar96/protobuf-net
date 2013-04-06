@@ -3,19 +3,20 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
+#warning IMPORTANT: this is the **BETA** v2 release. For the stable version, see /branches/v1
+
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("protobuf-net")]
 [assembly: AssemblyDescription("Protocol Buffers for .NET")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Marc Gravell")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("protobuf-net")]
 [assembly: AssemblyCopyright("See http://code.google.com/p/protobuf-net/")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-#if !PORTABLE
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
 // COM, set the ComVisible attribute to true on that type.
@@ -23,7 +24,6 @@ using System.Runtime.CompilerServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("224e5fc5-09f7-4fe3-a0a3-cf72b9f3593e")]
-#endif
 
 // Version information for an assembly consists of the following four values:
 //
@@ -35,9 +35,9 @@ using System.Runtime.CompilerServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.0.0.627")]
+[assembly: AssemblyVersion("2.0.0.420")]
 #if !CF
-[assembly: AssemblyFileVersion("2.0.0.627")]
+[assembly: AssemblyFileVersion("2.0.0.420")]
 #endif
 #if !FX11
 [assembly: InternalsVisibleTo("protobuf-net.unittest, PublicKey="

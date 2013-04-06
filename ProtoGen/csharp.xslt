@@ -43,6 +43,7 @@
 //     the code is regenerated.
 // &lt;/auto-generated&gt;
 //------------------------------------------------------------------------------
+#pragma warning disable 1591
 </xsl:text><!--
     --><xsl:apply-templates select="*"/><!--
   --></xsl:template>
@@ -130,7 +131,9 @@ namespace <xsl:value-of select="translate($namespace,':-/\','__..')"/>
 {</xsl:if>
     <xsl:apply-templates select="message_type | enum_type | service"/>
     <xsl:if test="string($namespace) != ''">
-}</xsl:if></xsl:template>
+}
+#pragma warning restore 1591
+</xsl:if></xsl:template>
   
   <xsl:template match="FileDescriptorProto/dependency/string">
 // Note: requires additional types generated from: <xsl:value-of select="."/></xsl:template>
@@ -338,7 +341,7 @@ namespace <xsl:value-of select="translate($namespace,':-/\','__..')"/>
     <xsl:variable name="hunt" select="type_name"/>
     <xsl:for-each select="//EnumDescriptorProto">
       <xsl:variable name="fullName">
-        <xsl:for-each select="ancestor::FileDescriptorProto[package!='']">.<xsl:value-of select="package"/></xsl:for-each>
+        <xsl:for-each select="ancestor::FileDescriptorProto">.<xsl:value-of select="package"/></xsl:for-each>
         <xsl:for-each select="ancestor::DescriptorProto">.<xsl:value-of select="name"/></xsl:for-each>
         <xsl:value-of select="'.'"/>
         <xsl:call-template name="pascal"/>
@@ -372,7 +375,7 @@ namespace <xsl:value-of select="translate($namespace,':-/\','__..')"/>
     private <xsl:value-of select="concat($fieldType,' ',$field)"/><xsl:if test="not($specified)"> = <xsl:value-of select="$defaultValue"/></xsl:if>;
     [<xsl:apply-templates select="." mode="checkDeprecated"/>global::ProtoBuf.ProtoMember(<xsl:value-of select="number"/>, IsRequired = false, Name=@"<xsl:value-of select="name"/>", DataFormat = global::ProtoBuf.DataFormat.<xsl:value-of select="$format"/>)]<!--
     --><xsl:if test="not($specified)">
-    [global::System.ComponentModel.DefaultValue(<xsl:value-of select="$defaultValue"/>)]</xsl:if><!--
+    [global::ProtoBuf.ProtoDefaultValue(<xsl:value-of select="$defaultValue"/>)]</xsl:if><!--
     --><xsl:if test="$optionXml">
     [global::System.Xml.Serialization.XmlElement(@"<xsl:value-of select="name"/>", Order = <xsl:value-of select="number"/>)]
     </xsl:if><xsl:if test="$optionDataContract">

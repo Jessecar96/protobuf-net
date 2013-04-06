@@ -6,7 +6,7 @@ namespace ProtoBuf
     /// Indicates that a type is defined for protocol-buffer serialization.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface,
-        AllowMultiple = false, Inherited = false)]
+        AllowMultiple = false, Inherited = true)]
     public sealed class ProtoContractAttribute : Attribute
     {
         /// <summary>
@@ -39,15 +39,6 @@ namespace ProtoBuf
             set { SetFlag(OPTIONS_UseProtoMembersOnly, value); }
         }
 
-        /// <summary>
-        /// If specified, do NOT treat this type as a list, even if it looks like one.
-        /// </summary>
-        public bool IgnoreListHandling
-        {
-            get { return HasFlag(OPTIONS_IgnoreListHandling); }
-            set { SetFlag(OPTIONS_IgnoreListHandling, value); }
-        }
-
 
         /// <summary>
         /// Gets or sets the mechanism used to automatically infer field tags
@@ -66,7 +57,7 @@ namespace ProtoBuf
         /// care to increase the Order for new elements, otherwise data corruption
         /// may occur.
         /// </summary>
-        /// <remarks>If not explicitly specified, the default is assumed from Serializer.GlobalOptions.InferTagFromName.</remarks>
+        /// <remarks>If not explicitly specified, the default is assumed from <see cref="Serializer.GlobalOptions.InferTagFromName"/>.</remarks>
         public bool InferTagFromName
         {
             get { return HasFlag(OPTIONS_InferTagFromName); }
@@ -110,18 +101,6 @@ namespace ProtoBuf
             set { SetFlag(OPTIONS_SkipConstructor, value); }
         }
 
-        /// <summary>
-        /// Should this type be treated as a reference by default? Please also see the implications of this,
-        /// as recorded on ProtoMemberAttribute.AsReference
-        /// </summary>
-        public bool AsReferenceDefault
-        {
-            get { return HasFlag(OPTIONS_AsReferenceDefault); }
-            set {
-                SetFlag(OPTIONS_AsReferenceDefault, value);
-            }
-        }
-
         private bool HasFlag(byte flag) { return (flags & flag) == flag; }
         private void SetFlag(byte flag, bool value)
         {
@@ -130,13 +109,12 @@ namespace ProtoBuf
         }
 
         private byte flags;
-
         private const byte
             OPTIONS_InferTagFromName = 1,
             OPTIONS_InferTagFromNameHasValue = 2,
             OPTIONS_UseProtoMembersOnly = 4,
-            OPTIONS_SkipConstructor = 8,
-            OPTIONS_IgnoreListHandling = 16,
-            OPTIONS_AsReferenceDefault = 32;
+            OPTIONS_SkipConstructor = 8;
+
+
     }
 }

@@ -6,11 +6,6 @@ using ProtoBuf.Meta;
 #if MF
 using OverflowException = System.ApplicationException;
 #endif
-
-#if FEAT_IKVM
-using Type = IKVM.Reflection.Type;
-#endif
-
 namespace ProtoBuf
 {
     /// <summary>
@@ -31,29 +26,26 @@ namespace ProtoBuf
         /// <param name="writer">The destination.</param>
         public static void WriteObject(object value, int key, ProtoWriter writer)
         {
-#if FEAT_IKVM
-            throw new NotSupportedException();
-#else
             if (writer.model == null)
             {
                 throw new InvalidOperationException("Cannot serialize sub-objects unless a model is provided");
             }
 
-            SubItemToken token = StartSubItem(value, writer);
-            if (key >= 0)
-            {
-                writer.model.Serialize(key, value, writer);
-            }
-            else if (writer.model != null && writer.model.TrySerializeAuxiliaryType(writer, value.GetType(), DataFormat.Default, Serializer.ListItemTag, value, false))
-            {
-                // all ok
-            }
-            else
-            {
-                TypeModel.ThrowUnexpectedType(value.GetType());
-            }
-            EndSubItem(token, writer);
-#endif 
+                SubItemToken token = StartSubItem(value, writer);
+                if (key >= 0)
+                {
+                    writer.model.Serialize(key, value, writer);
+                }
+                else if (writer.model != null && writer.model.TrySerializeAuxiliaryType(writer, value.GetType(), DataFormat.Default, Serializer.ListItemTag, value, false))
+                {
+                    // all ok
+                }
+                else
+                {
+                    TypeModel.ThrowUnexpectedType(value.GetType());
+                }
+                EndSubItem(token, writer);
+ 
         }
         /// <summary>
         /// Write an encapsulated sub-object, using the supplied unique key (reprasenting a type) - but the
@@ -75,9 +67,6 @@ namespace ProtoBuf
         }
         internal static void WriteObject(object value, int key, ProtoWriter writer, PrefixStyle style, int fieldNumber)
         {
-#if FEAT_IKVM
-            throw new NotSupportedException();
-#else
             if (writer.model == null)
             {
                 throw new InvalidOperationException("Cannot serialize sub-objects unless a model is provided");
@@ -112,7 +101,7 @@ namespace ProtoBuf
                 writer.model.Serialize(key, value, writer);
             }
             EndSubItem(token, writer, style);
-#endif       
+            
         }
 
         internal int GetTypeKey(ref Type type)
@@ -325,12 +314,6 @@ namespace ProtoBuf
                     writer.wireType = WireType.None;
                     return new SubItemToken(-writer.fieldNumber);
                 case WireType.String:
-#if DEBUG
-                    if(writer.model != null && writer.model.ForwardsOnly)
-                    {
-                        throw new ProtoException("Should not be buffering data");
-                    }
-#endif
                     writer.wireType = WireType.None;
                     DemandSpace(32, writer); // make some space in anticipation...
                     writer.flushLock++;
@@ -426,13 +409,8 @@ namespace ProtoBuf
                 default:
                     throw new ArgumentOutOfRangeException("style");
             }
-            // and this object is no longer a blockage - also flush if sensible
-            const int ADVISORY_FLUSH_SIZE = 1024;
-            if (--writer.flushLock == 0 && writer.ioIndex >= ADVISORY_FLUSH_SIZE)
-            {
-                ProtoWriter.Flush(writer);
-            }
-            
+            // and this object is no longer a blockage
+            writer.flushLock--;
         }
 
         /// <summary>
@@ -470,6 +448,7 @@ namespace ProtoBuf
             if (dest != null)
             {
                 Flush(this);
+                dest.Flush(); // down and down it goes...
                 dest = null;
             }
             model = null;
@@ -503,24 +482,13 @@ namespace ProtoBuf
             if (depth != 0 || flushLock != 0) throw new InvalidOperationException("Unable to close stream in an incomplete state");
             Dispose();
         }
-
-        internal void CheckDepthFlushlock()
-        {
-            if (depth != 0 || flushLock != 0) throw new InvalidOperationException("The writer is in an incomplete state");
-        }
-
-        /// <summary>
-        /// Get the TypeModel associated with this writer
-        /// </summary>
-        public TypeModel Model { get { return model; } }
-
         /// <summary>
         /// Writes any buffered data (if possible) to the underlying stream.
         /// </summary>
         /// <param name="writer">The writer to flush</param>
         /// <remarks>It is not always possible to fully flush, since some sequences
         /// may require values to be back-filled into the byte-stream.</remarks>
-        internal static void Flush(ProtoWriter writer)
+        private static void Flush(ProtoWriter writer)
         {
             if (writer.flushLock == 0 && writer.ioIndex != 0)
             {
@@ -528,7 +496,6 @@ namespace ProtoBuf
                 writer.ioIndex = 0;                
             }
         }
-
         /// <summary>
         /// Writes an unsigned 32-bit integer to the stream; supported wire-types: Variant, Fixed32, Fixed64
         /// </summary>
@@ -909,9 +876,9 @@ namespace ProtoBuf
             writer.packedFieldNumber = fieldNumber;
         }
 
-        internal string SerializeType(System.Type type)
+        internal string SerializeType(Type type)
         {
-            return TypeModel.SerializeType(model, type);
+            return model.SerializeType(type);
         }
         /// <summary>
         /// Specifies a known root object to use during reference-tracked serialization
@@ -921,12 +888,5 @@ namespace ProtoBuf
             NetCache.SetKeyedObject(NetObjectCache.Root, value);
         }
 
-        /// <summary>
-        /// Writes a Type to the stream, using the model's DynamicTypeFormatting if appropriate; supported wire-types: String
-        /// </summary>
-        public static void WriteType(System.Type value, ProtoWriter writer)
-        {
-            WriteString(writer.SerializeType(value), writer);
-        }
     }
 }

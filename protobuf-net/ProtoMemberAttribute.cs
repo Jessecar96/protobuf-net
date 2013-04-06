@@ -1,12 +1,5 @@
 ﻿using System;
 
-#if FEAT_IKVM
-using Type = IKVM.Reflection.Type;
-using IKVM.Reflection;
-#else
-using System.Reflection;
-#endif
-
 namespace ProtoBuf
 {
     /// <summary>
@@ -54,7 +47,7 @@ namespace ProtoBuf
         }
 
 #if !NO_RUNTIME
-        internal MemberInfo Member;
+        internal System.Reflection.MemberInfo Member;
         internal bool TagIsPinned;
 #endif
         /// <summary>
@@ -125,17 +118,6 @@ namespace ProtoBuf
             {
                 if (value) options |= MemberSerializationOptions.AsReference;
                 else options &= ~MemberSerializationOptions.AsReference;
-
-                options |= MemberSerializationOptions.AsReferenceHasValue;
-            }
-        }
-
-        internal bool AsReferenceHasValue
-        {
-            get { return (options & MemberSerializationOptions.AsReferenceHasValue) == MemberSerializationOptions.AsReferenceHasValue; }
-            set {
-                if (value) options |= MemberSerializationOptions.AsReferenceHasValue;
-                else options &= ~MemberSerializationOptions.AsReferenceHasValue;
             }
         }
 
@@ -192,10 +174,6 @@ namespace ProtoBuf
         /// This option only applies to list/array data.
         /// </summary>
         OverwriteList = 16,
-        /// <summary>
-        /// Determines whether the types AsReferenceDefault value is used, or whether this member's AsReference should be used
-        /// </summary>
-        AsReferenceHasValue = 32
     }
 
     /// <summary>
@@ -208,7 +186,7 @@ namespace ProtoBuf
     /// fixed-length encoding for large values.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class,
-            AllowMultiple = true, Inherited = false)]
+            AllowMultiple = true, Inherited = true)]
     public class ProtoPartialMemberAttribute : ProtoMemberAttribute
     {
         /// <summary>
